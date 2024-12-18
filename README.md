@@ -4,7 +4,7 @@
 python train.py
 ```
 
-## Phenotyping
+## Phenotyping:
 Green leaves and yellow leaves segmentation
 ![LeavesSeg](./assets/seg.gif)
 
