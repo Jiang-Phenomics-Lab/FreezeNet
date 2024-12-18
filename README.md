@@ -1,15 +1,7 @@
 # FreezeNet: A lightweight deep learning model for enhancing freeze tolerance assessment and genetic analysis in wheat
 ## Description
 ### Model
-FreezeNet, a lightweight neural network, is suitable for image segmentation of wheat seedlings in field environments. The network architecture is as follows:
-![FreezeNet](./assets/model.png)
-**Figure** Architectural components of FreezeNet. **(a)** The overall architecture of FreezeNet. 
-**(b)** The structure of the Inverted Residual Block. **(c)** The structure of the convolution 
-block (Conv Block). **(d)** The structure of the Attention Block. 
-### Attention mechanism 
-This attention mechanism leverages high-level feature maps to optimize low-level feature maps by adding spatial location information. Meanwhile, low-level feature maps are used to optimize high-level feature maps by adding detail information. 
-![attention](./assets/attention.png)
-**Figure** Illustration of attention mechanism.
+FreezeNet, a lightweight neural network, is suitable for image segmentation of wheat seedlings in field environments.
 
 
 ## Requirements

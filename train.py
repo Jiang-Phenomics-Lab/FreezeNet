@@ -30,7 +30,7 @@ Init_lr= 1e-4
 Min_lr= 1e-6
 
 
-files=sorted(glob('/public/home/fjsun/workspace/UNet/datasets/labels/*.png'))
+files=sorted(glob('../datasets/labels/*.jpg')) #change your own dataset path (labels), more info in data FreezeNetDataset
 random.seed(6666)
 random.shuffle(files)
 files=files[:121]

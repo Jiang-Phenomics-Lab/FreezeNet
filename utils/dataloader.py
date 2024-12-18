@@ -12,7 +12,7 @@ import imutils
 table={}
 
 
-for i in glob('/public/home/fjsun/workspace/UNet/datasets/images/*.png'):
+for i in glob('./datasets/images/*.png'):
     fname=i.split('/')[-1].split('.')[0]
     table[fname]=i
 
