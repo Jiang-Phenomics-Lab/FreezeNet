@@ -10,20 +10,20 @@ from glob import glob
 import random
 import imutils
 table={}
-for i in glob('./datasets/images/*'):
+
+
+for i in glob('/public/home/fjsun/workspace/UNet/datasets/images/*.png'):
     fname=i.split('/')[-1].split('.')[0]
     table[fname]=i
 
-
 class FreezeNetDataset(Dataset):
-    def __init__(self, annotation_lines, input_shape, num_classes, train, dataset_path):
-        super(UnetDataset, self).__init__()
+    def __init__(self, annotation_lines, input_shape, num_classes, train):
+        super(FreezeNetDataset, self).__init__()
         self.annotation_lines   = annotation_lines
         self.length             = len(annotation_lines)
         self.input_shape        = input_shape
         self.num_classes        = num_classes
         self.train              = train
-        self.dataset_path       = dataset_path
     def __len__(self):
         return self.length
     def __getitem__(self, index):
@@ -73,8 +73,7 @@ class FreezeNetDataset(Dataset):
         return image, label
 
 
-# DataLoader中collate_fn使用
-def unet_dataset_collate(batch):
+def freezenet_dataset_collate(batch):
     images      = []
     pngs        = []
     seg_labels  = []

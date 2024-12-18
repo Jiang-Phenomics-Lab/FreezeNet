@@ -1,4 +1,4 @@
-from nets.liteNet import FreezyNet
+from nets.FreezeNet import FreezeNet
 import os
 import datetime
 
@@ -18,20 +18,19 @@ input_shape=(512,512)
 num_classes=2
 momentum= 0.9
 weight_decay= 5e-4  
-batch_size=8
+batch_size=4
 val_batch_size=4
 CUDA=True
-Epoch=1500
-log_dir='FreezyNet_'
-
-
+Epoch=4000
+log_dir='FreezyNet'
 log_dir='logs/'+log_dir
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
+Init_lr= 1e-4  
+Min_lr= 1e-6
 
 
-    
-files=sorted(glob('./datasets/labels/*.png'))
+files=sorted(glob('/public/home/fjsun/workspace/UNet/datasets/labels/*.png'))
 random.seed(6666)
 random.shuffle(files)
 files=files[:121]
@@ -40,17 +39,17 @@ val_lines=files[:int(validation*len(files))]
 train_lines=files[int(validation*len(files)):]
 
 
-VOCdevkit_path  = './VOCdevkit'
-train_dataset = FreezeNetDataset(train_lines, input_shape, num_classes, True, VOCdevkit_path)
-val_dataset = FreezeNetDataset(val_lines, input_shape, num_classes, False, VOCdevkit_path)
+train_dataset = FreezeNetDataset(train_lines, input_shape, num_classes, True)
+val_dataset = FreezeNetDataset(val_lines, input_shape, num_classes, False)
 
+print(len(files))
 
 
 
 gen = DataLoader(train_dataset, shuffle = True, batch_size = batch_size, num_workers = 2, pin_memory=True,
-                            drop_last=True, collate_fn=unet_dataset_collate)
+                            drop_last=True, collate_fn=freezenet_dataset_collate)
 gen_val= DataLoader(val_dataset  , shuffle = True, batch_size = val_batch_size, num_workers = 2, pin_memory=True,
-                            drop_last=True, collate_fn=unet_dataset_collate)
+                            drop_last=True, collate_fn=freezenet_dataset_collate)
 
 
 epoch_step = len(train_dataset) // batch_size
@@ -58,17 +57,16 @@ epoch_step_val = len(val_dataset) // val_batch_size
 
 
 #model
-model=FreezyNet()
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+model=FreezeNet()
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 if CUDA:
     cudnn.benchmark = True
     model=model.to(device)
     
 criterion = torch.nn.CrossEntropyLoss()
-Init_lr= 5e-6   
-Min_lr= 4e-7
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 optimizer=optim.Adam(model.parameters(), Init_lr, betas = (momentum, 0.999), weight_decay = weight_decay)
 warmup_cos_lr_func = warm_up_cos(Init_lr, Min_lr, Epoch)
 
@@ -90,9 +88,9 @@ for epoch in range(Epoch):
             imgs,labels,onehot_labels=batch
             with torch.no_grad():
                 if CUDA:
-                    imgs=imgs.cuda(1)
-                    labels=labels.cuda(1)
-                    onehot_labels=onehot_labels.cuda(1)
+                    imgs=imgs.cuda()
+                    labels=labels.cuda()
+                    onehot_labels=onehot_labels.cuda()
 
             optimizer.zero_grad()
             output = model(imgs)
@@ -121,14 +119,14 @@ for epoch in range(Epoch):
             imgs,labels,onehot_labels=batch
             with torch.no_grad():
                 if CUDA:
-                    imgs=imgs.cuda(1)
-                    labels=labels.cuda(1)
-                    onehot_labels=onehot_labels.cuda(1)
+                    imgs=imgs.cuda()
+                    labels=labels.cuda()
+                    onehot_labels=onehot_labels.cuda()
 
                 output = model(imgs)
-                #loss = compute_total_loss(coarse_output, labels, selected_points_list, refined_output_at_points_list)
+
                 loss=F.cross_entropy(output, labels)+Dice_loss(output, onehot_labels)
-                #loss=Dice_loss(output, onehot_labels)+IoU_loss(output, onehot_labels)
+
                 val_total_loss+=loss.item()
                 val_total_accuracy+=compute_accuracy(output,labels)
                 val_total_f1_score+=compute_f1_score(output,labels)
