@@ -1,18 +1,13 @@
 import cv2
 import torch
 import torch.nn.functional as F
-from PIL import Image
 from torch import nn
 from nets.FreezeNet import FreezeNet
 import numpy as np
-
 from glob import glob
-import random
-import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from tqdm import tqdm
 import os
-import pandas as pd
 from utils.util import find_ring
 
 
@@ -23,9 +18,11 @@ model = FreezeNet()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.load_state_dict(torch.load('model/phoneLite.pth', map_location=device))
 model = nn.DataParallel(model)
-model = model.cuda()
+model = model.to(device)
 model = model.eval()
-
+save_dir='outputs'
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
 input_shape=(512,512)
 with tqdm(total=len(files),desc='Progress:',postfix=dict,mininterval=0.3) as pbar:
     for index,file in enumerate(files):
@@ -42,13 +39,13 @@ with tqdm(total=len(files),desc='Progress:',postfix=dict,mininterval=0.3) as pba
         image=cv2.bitwise_and(image,new)
         image=image[y1:y2,x1:x2,:]
         image=cv2.resize(image,(input_shape[0],input_shape[0]))
-        img=torch.from_numpy(image/255).float().cuda()
+        img=torch.from_numpy(image/255).float().to(device)
         img=img.unsqueeze(0)
         img=img.permute(0,3,1,2)
         with torch.no_grad():
             output=model(img)
         output = output[0].permute(1,2,0).cpu().argmax(axis=-1).numpy().astype(np.uint8)
         new = cv2.bitwise_and(image,image,mask=output)
-        cv2.imwrite('outputs/{}'.format(os.path.basename(file)),new)
+        cv2.imwrite('{}/{}'.format(save_dir,os.path.basename(file)),new)
         pbar.update(1)
     
