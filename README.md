@@ -1,5 +1,4 @@
 # FreezeNet: A lightweight deep learning model for enhancing freeze tolerance assessment and genetic analysis in wheat
-----
 ## Description
 ### Model
 FreezeNet, a lightweight neural network, is suitable for image segmentation of wheat seedlings in field environments. The network architecture is as follows:
